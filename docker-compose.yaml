@@ -1,0 +1,57 @@
+version: '3.9'
+
+networks:
+  anivoy-shared-net:
+    driver: "bridge"
+
+services:
+  postgres:
+    image: postgres:17
+    container_name: anivoy-main-db
+    networks:
+      - anivoy-shared-net
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${MAIN_DB_USER}
+      POSTGRES_PASSWORD: ${MAIN_DB_PASSWORD}
+      POSTGRES_DB: ${MAIN_DB_NAME}
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  redis:
+    image: redis:7
+    container_name: anivoy-redis
+    networks:
+      - anivoy-shared-net
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+
+  postgis:
+    image: postgis/postgis:15-3.3
+    container_name: anivoy-postgis
+    networks:
+      - anivoy-shared-net
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${GIS_DB_USER}
+      POSTGRES_PASSWORD: ${GIS_DB_PASSWORD}
+      POSTGRES_DB: ${GIS_DB_NAME}
+    ports:
+      - "5433:5432"
+    volumes:
+      - gis-data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  db-data:
+  redis-data:
+  gis-data:
