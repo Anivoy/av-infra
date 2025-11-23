@@ -2,7 +2,7 @@ version: '3.9'
 
 networks:
   anivoy-shared-net:
-    driver: "bridge"
+    external: true
 
 services:
   postgres:
@@ -34,24 +34,6 @@ services:
       - redis-data:/data
     restart: unless-stopped
 
-  postgis:
-    image: postgis/postgis:15-3.3
-    container_name: anivoy-postgis
-    networks:
-      - anivoy-shared-net
-    env_file:
-      - .env
-    environment:
-      POSTGRES_USER: ${GIS_DB_USER}
-      POSTGRES_PASSWORD: ${GIS_DB_PASSWORD}
-      POSTGRES_DB: ${GIS_DB_NAME}
-    ports:
-      - "5433:5432"
-    volumes:
-      - gis-data:/var/lib/postgresql/data
-    restart: unless-stopped
-
 volumes:
   db-data:
   redis-data:
-  gis-data:
